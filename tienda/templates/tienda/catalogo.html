@@ -1,0 +1,271 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JK Variedades | Catálogo Oficial</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- FontAwesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-[#faf8f5] text-[#111827] min-h-screen flex flex-col font-sans">
+
+    <!-- Encabezado con el Logo -->
+    <header class="bg-gradient-to-r from-[#071C2B] via-[#0d273d] to-[#071C2B] text-white py-6 px-4 shadow-lg text-center relative overflow-hidden">
+        <div class="absolute -right-6 -bottom-6 text-white/5 text-8xl pointer-events-none">
+            <i class="fa-solid fa-store"></i>
+        </div>
+        <div class="max-w-2xl mx-auto relative z-10 flex flex-col items-center justify-center">
+            {% if configuracion and configuracion.logo %}
+                <!-- Muestra el logo dinámico que subas desde el admin -->
+                <img src="{{ configuracion.logo.url }}" alt="JK Variedades" class="h-14 md:h-25 w-auto object-contain mb-1 drop-shadow-md transition hover:scale-105">
+            {% else %}
+                <!-- Texto por si aún no has subido ningún logo -->
+                <h1 class="text-3xl font-black tracking-wider uppercase">JK Variedades</h1>
+            {% endif %}
+            <p class="text-xs text-gray-300 tracking-wider">Tu tienda de confianza • Encuentra de todo en un solo lugar</p>
+        </div>
+    </header>
+
+    <!-- Contenedor Principal -->
+    <main class="flex-grow max-w-4xl w-full mx-auto p-4">
+
+        <!-- Barra de Búsqueda y Filtros -->
+        <div class="mb-6 space-y-4">
+            <div class="relative">
+                <input type="text" id="searchInput" value="{{ request.GET.q|default:'' }}" placeholder="Busca un producto..." 
+                       class="w-full bg-white border border-gray-300 rounded-xl py-3 pl-11 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-[#071C2B] shadow-sm transition">
+                <i class="fa-solid fa-magnifying-glass absolute left-4 top-3.5 text-gray-400"></i>
+                <button id="clearSearch" class="absolute right-3 top-3 text-gray-400 hover:text-gray-600 hidden">
+                    <i class="fa-solid fa-circle-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="flex overflow-x-auto space-x-2 pb-2 scrollbar-none">
+                <a href="?" class="px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition {% if not categoria_activa and not request.GET.q %}bg-[#071C2B] text-white shadow-sm{% else %}bg-white text-gray-700 border border-gray-300 hover:bg-gray-100{% endif %}">
+                    Todos los productos
+                </a>
+                {% for cat in categorias %}
+                    <a href="?categoria={{ cat.id }}" class="px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition {% if categoria_activa == cat.id|slugify %}bg-[#071C2B] text-white shadow-sm{% else %}bg-white text-gray-700 border border-gray-300 hover:bg-gray-100{% endif %}">
+                        {{ cat.nombre }}
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Cuadrícula de Productos -->
+        <div id="productContainer">
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {% for producto in productos %}
+                <div class="product-card bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm flex flex-col justify-between transition hover:shadow-md cursor-pointer group"
+                     data-name="{{ producto.nombre }}"
+                     data-price="{{ producto.precio|floatformat:0 }}"
+                     data-img="{% if producto.imagen %}{{ producto.imagen.url }}{% endif %}"
+                     data-desc="{{ producto.descripcion|default:'Sin descripción disponible por el momento.' }}"
+                     data-whatsapp="{{ producto.get_whatsapp_link }}">
+                    
+                    <div class="w-full h-40 bg-gray-100 relative overflow-hidden flex items-center justify-center">
+                        {% if producto.imagen %}
+                            <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                        {% else %}
+                            <i class="fa-solid fa-image text-gray-300 text-3xl"></i>
+                        {% endif %}
+                    </div>
+
+                    <div class="p-3 flex flex-col flex-grow justify-between">
+                        <div>
+                            <span class="text-[10px] uppercase font-semibold text-gray-400 tracking-wider">
+                                {% if producto.categoria %}{{ producto.categoria.nombre }}{% else %}General{% endif %}
+                            </span>
+                            <h3 class="text-sm font-bold text-gray-800 line-clamp-2 mt-0.5">{{ producto.nombre }}</h3>
+                        </div>
+
+                        <div class="mt-3">
+                            <span class="text-base font-extrabold text-[#071C2B] block mb-2">
+                                ${{ producto.precio|floatformat:0 }}
+                            </span>
+                            <div class="w-full bg-gray-100 text-gray-700 hover:bg-gray-200 text-xs font-bold py-2 px-3 rounded-xl flex items-center justify-center space-x-1 transition">
+                                <i class="fa-solid fa-eye text-xs"></i>
+                                <span>Ver detalles</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-span-full text-center py-12">
+                    <i class="fa-solid fa-box-open text-gray-300 text-4xl mb-2"></i>
+                    <p class="text-sm text-gray-500">No se encontraron productos disponibles.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+    </main>
+
+    <!-- VENTANA MODAL -->
+    <div id="productModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
+        <div id="modalContent" class="bg-white w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl transform scale-95 transition-transform duration-300 flex flex-col max-h-[90vh]">
+            
+            <div class="flex justify-between items-center p-4 border-b border-gray-100">
+                <span class="text-xs font-bold uppercase tracking-wider text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">Detalles del producto</span>
+                <button id="closeModalBtn" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="p-6 overflow-y-auto space-y-4">
+                <div class="w-full h-64 bg-gray-100 rounded-2xl overflow-hidden flex items-center justify-center border border-gray-100">
+                    <img id="modalImg" src="" alt="" class="w-full h-full object-cover">
+                </div>
+
+                <div>
+                    <h2 id="modalTitle" class="text-xl font-black text-gray-900"></h2>
+                    <span id="modalPrice" class="text-2xl font-black text-[#071C2B] block mt-1"></span>
+                </div>
+
+                <div>
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Descripción</h4>
+                    <p id="modalDesc" class="text-sm text-gray-600 leading-relaxed whitespace-pre-line"></p>
+                </div>
+            </div>
+
+            <div class="p-4 border-t border-gray-100 bg-gray-50">
+                <a id="modalWhatsAppBtn" href="#" target="_blank" 
+                   class="w-full bg-[#25D366] hover:bg-[#20ba5a] text-white text-sm font-bold py-3 px-4 rounded-xl flex items-center justify-center space-x-2 shadow-sm transition">
+                    <i class="fa-brands fa-whatsapp text-lg"></i>
+                    <span>Pedir por WhatsApp</span>
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Pie de página -->
+    <footer class="bg-white border-t border-gray-200 text-center py-4 mt-8 text-xs text-gray-500">
+        &copy; 2026 JK Variedades. Todos los derechos reservados.
+    </footer>
+
+    <!-- Script General y Manejo de Eventos -->
+    <script>
+        const modal = document.getElementById('productModal');
+        const modalContent = document.getElementById('modalContent');
+        const modalImg = document.getElementById('modalImg');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalPrice = document.getElementById('modalPrice');
+        const modalDesc = document.getElementById('modalDesc');
+        const modalWhatsAppBtn = document.getElementById('modalWhatsAppBtn');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+
+        function openModalFromCard(card) {
+            modalTitle.innerText = card.dataset.name;
+            modalPrice.innerText = '$' + card.dataset.price;
+            modalDesc.innerText = card.dataset.desc;
+            modalWhatsAppBtn.href = card.dataset.whatsapp;
+
+            if (card.dataset.img) {
+                modalImg.src = card.dataset.img;
+                modalImg.classList.remove('hidden');
+            } else {
+                modalImg.classList.add('hidden');
+            }
+
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modalContent.classList.remove('scale-95');
+                modalContent.classList.add('scale-100');
+            }, 10);
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            modal.classList.add('opacity-0');
+            modalContent.classList.remove('scale-100');
+            modalContent.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+            document.body.style.overflow = 'auto';
+        }
+
+        document.addEventListener('click', function(e) {
+            const card = e.target.closest('.product-card');
+            if (card) {
+                openModalFromCard(card);
+            }
+        });
+
+        closeModalBtn.addEventListener('click', closeModal);
+
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+
+        // Búsqueda Dinámica
+        const searchInput = document.getElementById('searchInput');
+        const clearSearch = document.getElementById('clearSearch');
+        const productContainer = document.getElementById('productContainer');
+        let timeout = null;
+
+        function toggleClearButton() {
+            if (searchInput.value.length > 0) {
+                clearSearch.classList.remove('hidden');
+            } else {
+                clearSearch.classList.add('hidden');
+            }
+        }
+
+        toggleClearButton();
+
+        searchInput.addEventListener('input', function() {
+            toggleClearButton();
+            clearTimeout(timeout);
+            
+            const query = this.value;
+            const currentUrl = new URL(window.location.href);
+            if (query) {
+                currentUrl.searchParams.set('q', query);
+            } else {
+                currentUrl.searchParams.delete('q');
+            }
+
+            timeout = setTimeout(() => {
+                fetch(currentUrl.toString(), {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(response => response.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    productContainer.innerHTML = doc.getElementById('productContainer').innerHTML;
+                    window.history.replaceState({}, '', currentUrl.toString());
+                });
+            }, 300);
+        });
+
+        clearSearch.addEventListener('click', function() {
+            searchInput.value = '';
+            toggleClearButton();
+            const currentUrl = new URL(window.location.href);
+            currentUrl.searchParams.delete('q');
+            
+            fetch(currentUrl.toString(), {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                productContainer.innerHTML = doc.getElementById('productContainer').innerHTML;
+                window.history.replaceState({}, '', currentUrl.toString());
+            });
+            searchInput.focus();
+        });
+    </script>
+
+</body>
+</html>
