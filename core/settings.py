@@ -148,6 +148,6 @@ AWS_S3_ENDPOINT_URL = os.environ.get("AWS_S3_ENDPOINT_URL")
 AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME")
 AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
-
+AWS_S3_CUSTOM_DOMAIN = "grjvoogodesjynllprsz.supabase.co/storage/v1/object/public/product-imagenes"
 AWS_QUERYSTRING_AUTH = False
 AWS_DEFAULT_ACL = None
