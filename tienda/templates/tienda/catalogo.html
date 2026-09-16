@@ -19,10 +19,8 @@
         </div>
         <div class="max-w-2xl mx-auto relative z-10 flex flex-col items-center justify-center">
             {% if configuracion and configuracion.logo %}
-                <!-- Muestra el logo dinámico que subas desde el admin -->
                 <img src="{{ configuracion.logo.url }}" alt="JK Variedades" class="h-14 md:h-25 w-auto object-contain mb-1 drop-shadow-md transition hover:scale-105">
             {% else %}
-                <!-- Texto por si aún no has subido ningún logo -->
                 <h1 class="text-3xl font-black tracking-wider uppercase">JK Variedades</h1>
             {% endif %}
             <p class="text-xs text-gray-300 tracking-wider">Tu tienda de confianza • Encuentra de todo en un solo lugar</p>
@@ -62,7 +60,7 @@
                 <div class="product-card bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm flex flex-col justify-between transition hover:shadow-md cursor-pointer group"
                      data-name="{{ producto.nombre }}"
                      data-price="{{ producto.precio|floatformat:0 }}"
-                     data-img="{% if producto.imagen %}{{ producto.imagen.url }}{% endif %}"
+                     data-images='[{% if producto.imagen %}"{{ producto.imagen.url }}"{% endif %}{% for img in producto.imagenes.all %}, "{{ img.imagen.url }}"{% endfor %}]'
                      data-desc="{{ producto.descripcion|default:'Sin descripción disponible por el momento.' }}"
                      data-whatsapp="{{ producto.get_whatsapp_link }}">
                     
@@ -104,7 +102,7 @@
 
     </main>
 
-    <!-- VENTANA MODAL -->
+    <!-- VENTANA MODAL CON CARRUSEL -->
     <div id="productModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
         <div id="modalContent" class="bg-white w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl transform scale-95 transition-transform duration-300 flex flex-col max-h-[90vh]">
             
@@ -116,8 +114,24 @@
             </div>
 
             <div class="p-6 overflow-y-auto space-y-4">
-                <div class="w-full h-64 bg-gray-100 rounded-2xl overflow-hidden flex items-center justify-center border border-gray-100">
-                    <img id="modalImg" src="" alt="" class="w-full h-full object-cover">
+                <!-- CARRUSEL DE IMÁGENES -->
+                <div class="relative w-full h-64 bg-gray-900 rounded-2xl overflow-hidden flex items-center justify-center border border-gray-100 group">
+                    <div id="carouselTrack" class="flex w-full h-full overflow-x-auto snap-x snap-mandatory scrollbar-none scroll-smooth">
+                        <!-- Las imágenes se inyectan dinámicamente aquí -->
+                    </div>
+
+                    <!-- Botones de Navegación del Carrusel -->
+                    <button id="prevSlide" class="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-black/70 transition opacity-0 group-hover:opacity-150">
+                        <i class="fa-solid fa-chevron-left text-xs"></i>
+                    </button>
+                    <button id="nextSlide" class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-black/70 transition opacity-0 group-hover:opacity-150">
+                        <i class="fa-solid fa-chevron-right text-xs"></i>
+                    </button>
+
+                    <!-- Indicadores (Puntos) -->
+                    <div id="carouselDots" class="absolute bottom-2 left-1/2 -translate-x-1/2 flex space-x-1.5 z-10">
+                        <!-- Se generan dinámicamente -->
+                    </div>
                 </div>
 
                 <div>
@@ -142,21 +156,40 @@
         </div>
     </div>
 
+    <!-- LIGHTBOX PARA VER IMAGEN AMPLIADA AL CENTRO -->
+    <div id="lightboxModal" class="fixed inset-0 z-60 bg-black/90 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+        <button id="closeLightbox" class="absolute top-5 right-5 text-white text-3xl hover:text-gray-300 transition z-10">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        <img id="lightboxImg" src="" alt="Imagen ampliada" class="max-w-[90vw] max-h-[90vh] object-contain rounded-lg">
+    </div>
+
     <!-- Pie de página -->
     <footer class="bg-white border-t border-gray-200 text-center py-4 mt-8 text-xs text-gray-500">
         &copy; 2026 JK Variedades. Todos los derechos reservados.
     </footer>
 
-    <!-- Script General y Manejo de Eventos -->
+    <!-- Script General y Carrusel -->
     <script>
         const modal = document.getElementById('productModal');
         const modalContent = document.getElementById('modalContent');
-        const modalImg = document.getElementById('modalImg');
         const modalTitle = document.getElementById('modalTitle');
         const modalPrice = document.getElementById('modalPrice');
         const modalDesc = document.getElementById('modalDesc');
         const modalWhatsAppBtn = document.getElementById('modalWhatsAppBtn');
         const closeModalBtn = document.getElementById('closeModalBtn');
+
+        const carouselTrack = document.getElementById('carouselTrack');
+        const carouselDots = document.getElementById('carouselDots');
+        const prevSlideBtn = document.getElementById('prevSlide');
+        const nextSlideBtn = document.getElementById('nextSlide');
+
+        const lightboxModal = document.getElementById('lightboxModal');
+        const lightboxImg = document.getElementById('lightboxImg');
+        const closeLightbox = document.getElementById('closeLightbox');
+
+        let currentSlideIndex = 0;
+        let imagesArray = [];
 
         function openModalFromCard(card) {
             modalTitle.innerText = card.dataset.name;
@@ -164,11 +197,47 @@
             modalDesc.innerText = card.dataset.desc;
             modalWhatsAppBtn.href = card.dataset.whatsapp;
 
-            if (card.dataset.img) {
-                modalImg.src = card.dataset.img;
-                modalImg.classList.remove('hidden');
+            try {
+                imagesArray = JSON.parse(card.dataset.images || '[]');
+            } catch (e) {
+                imagesArray = [];
+            }
+
+            carouselTrack.innerHTML = '';
+            carouselDots.innerHTML = '';
+            currentSlideIndex = 0;
+
+            if (imagesArray.length > 0) {
+                imagesArray.forEach((imgUrl, index) => {
+                    // Slide individual con object-contain para evitar cortes
+                    const slide = document.createElement('div');
+                    slide.className = 'w-full h-full flex-shrink-0 snap-center flex items-center justify-center cursor-pointer bg-black/5';
+                    slide.innerHTML = `<img src="${imgUrl}" alt="Foto ${index + 1}" class="w-full h-full object-contain transition hover:scale-102">`;
+                    
+                    // Evento para abrir el Lightbox al hacer clic en la imagen
+                    slide.querySelector('img').addEventListener('click', () => {
+                        lightboxImg.src = imgUrl;
+                        lightboxModal.classList.remove('hidden');
+                        setTimeout(() => lightboxModal.classList.remove('opacity-0'), 10);
+                    });
+
+                    carouselTrack.appendChild(slide);
+
+                    // Punto indicador
+                    const dot = document.createElement('button');
+                    dot.className = `w-2 h-2 rounded-full transition ${index === 0 ? 'bg-white w-4' : 'bg-white/50'}`;
+                    dot.addEventListener('click', () => scrollToSlide(index));
+                    carouselDots.appendChild(dot);
+                });
+
+                prevSlideBtn.style.display = imagesArray.length > 1 ? 'flex' : 'none';
+                nextSlideBtn.style.display = imagesArray.length > 1 ? 'flex' : 'none';
+                carouselDots.style.display = imagesArray.length > 1 ? 'flex' : 'none';
             } else {
-                modalImg.classList.add('hidden');
+                carouselTrack.innerHTML = `<div class="w-full h-full flex items-center justify-center text-gray-400"><i class="fa-solid fa-image text-3xl"></i></div>`;
+                prevSlideBtn.style.display = 'none';
+                nextSlideBtn.style.display = 'none';
+                carouselDots.style.display = 'none';
             }
 
             modal.classList.remove('hidden');
@@ -179,6 +248,40 @@
             }, 10);
             document.body.style.overflow = 'hidden';
         }
+
+        function scrollToSlide(index) {
+            if (imagesArray.length === 0) return;
+            currentSlideIndex = (index + imagesArray.length) % imagesArray.length;
+            const slideWidth = carouselTrack.clientWidth;
+            carouselTrack.scrollTo({ left: slideWidth * currentSlideIndex, behavior: 'smooth' });
+            updateDots();
+        }
+
+        function updateDots() {
+            const dots = carouselDots.children;
+            for (let i = 0; i < dots.length; i++) {
+                dots[i].className = `w-2 h-2 rounded-full transition ${i === currentSlideIndex ? 'bg-white w-4' : 'bg-white/50'}`;
+            }
+        }
+
+        prevSlideBtn.addEventListener('click', () => scrollToSlide(currentSlideIndex - 1));
+        nextSlideBtn.addEventListener('click', () => scrollToSlide(currentSlideIndex + 1));
+
+        carouselTrack.addEventListener('scroll', () => {
+            if (imagesArray.length === 0) return;
+            const slideWidth = carouselTrack.clientWidth;
+            const index = Math.round(carouselTrack.scrollLeft / slideWidth);
+            if (index !== currentSlideIndex) {
+                currentSlideIndex = index;
+                updateDots();
+            }
+        });
+
+        // Cerrar Lightbox
+        closeLightbox.addEventListener('click', () => {
+            lightboxModal.classList.add('opacity-0');
+            setTimeout(() => lightboxModal.classList.add('hidden'), 300);
+        });
 
         function closeModal() {
             modal.classList.add('opacity-0');
@@ -198,14 +301,11 @@
         });
 
         closeModalBtn.addEventListener('click', closeModal);
-
         modal.addEventListener('click', function(e) {
-            if (e.target === modal) {
-                closeModal();
-            }
+            if (e.target === modal) closeModal();
         });
 
-        // Búsqueda Dinámica
+        // Búsqueda Dinámica (manteniendo tu lógica existente)
         const searchInput = document.getElementById('searchInput');
         const clearSearch = document.getElementById('clearSearch');
         const productContainer = document.getElementById('productContainer');

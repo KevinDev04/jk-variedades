@@ -151,3 +151,9 @@ AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
 AWS_S3_CUSTOM_DOMAIN = "grjvoogodesjynllprsz.supabase.co/storage/v1/object/public/product-imagenes"
 AWS_QUERYSTRING_AUTH = False
 AWS_DEFAULT_ACL = None
+
+
+try:
+    from .settings_local import *
+except ImportError:
+    pass
