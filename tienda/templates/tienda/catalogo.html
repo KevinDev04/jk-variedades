@@ -5,366 +5,1542 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JK Variedades | Catálogo Oficial</title>
+
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
     <!-- FontAwesome para iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
+
 <body class="bg-[#faf8f5] text-[#111827] min-h-screen flex flex-col font-sans">
 
-    <!-- Encabezado con el Logo -->
+    <!-- ========================================================= -->
+    <!-- ENCABEZADO -->
+    <!-- ========================================================= -->
+
     <header class="bg-gradient-to-r from-[#071C2B] via-[#0d273d] to-[#071C2B] text-white py-6 px-4 shadow-lg text-center relative overflow-hidden">
+
         <div class="absolute -right-6 -bottom-6 text-white/5 text-8xl pointer-events-none">
             <i class="fa-solid fa-store"></i>
         </div>
+
         <div class="max-w-2xl mx-auto relative z-10 flex flex-col items-center justify-center">
+
             {% if configuracion and configuracion.logo %}
-                <img src="{{ configuracion.logo.url }}" alt="JK Variedades" class="h-14 md:h-25 w-auto object-contain mb-1 drop-shadow-md transition hover:scale-105">
+                <img
+                    src="{{ configuracion.logo.url }}"
+                    alt="JK Variedades"
+                    class="h-14 md:h-25 w-auto object-contain mb-1 drop-shadow-md transition hover:scale-105"
+                >
             {% else %}
-                <h1 class="text-3xl font-black tracking-wider uppercase">JK Variedades</h1>
+                <h1 class="text-3xl font-black tracking-wider uppercase">
+                    JK Variedades
+                </h1>
             {% endif %}
-            <p class="text-xs text-gray-300 tracking-wider">Tu tienda de confianza • Encuentra de todo en un solo lugar</p>
+
+            <p class="text-xs text-gray-300 tracking-wider">
+                Tu tienda de confianza • Encuentra de todo en un solo lugar
+            </p>
+
         </div>
     </header>
 
-    <!-- Contenedor Principal -->
+
+    <!-- ========================================================= -->
+    <!-- CONTENEDOR PRINCIPAL -->
+    <!-- ========================================================= -->
+
     <main class="flex-grow max-w-4xl w-full mx-auto p-4">
 
-        <!-- Barra de Búsqueda y Filtros -->
+        <!-- ===================================================== -->
+        <!-- BUSCADOR Y FILTROS -->
+        <!-- ===================================================== -->
+
         <div class="mb-6 space-y-4">
+
             <div class="relative">
-                <input type="text" id="searchInput" value="{{ request.GET.q|default:'' }}" placeholder="Busca un producto..." 
-                       class="w-full bg-white border border-gray-300 rounded-xl py-3 pl-11 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-[#071C2B] shadow-sm transition">
+
+                <input
+                    type="text"
+                    id="searchInput"
+                    value="{{ request.GET.q|default:'' }}"
+                    placeholder="Busca un producto..."
+                    class="w-full bg-white border border-gray-300 rounded-xl py-3 pl-11 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-[#071C2B] shadow-sm transition"
+                >
+
                 <i class="fa-solid fa-magnifying-glass absolute left-4 top-3.5 text-gray-400"></i>
-                <button id="clearSearch" class="absolute right-3 top-3 text-gray-400 hover:text-gray-600 hidden">
+
+                <button
+                    id="clearSearch"
+                    class="absolute right-3 top-3 text-gray-400 hover:text-gray-600 hidden"
+                >
                     <i class="fa-solid fa-circle-xmark text-lg"></i>
                 </button>
+
             </div>
+
 
             <div class="flex overflow-x-auto space-x-2 pb-2 scrollbar-none">
-                <a href="?" class="px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition {% if not categoria_activa and not request.GET.q %}bg-[#071C2B] text-white shadow-sm{% else %}bg-white text-gray-700 border border-gray-300 hover:bg-gray-100{% endif %}">
+
+                <a
+                    href="?"
+                    class="px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition
+                    {% if not categoria_activa and not request.GET.q %}
+                        bg-[#071C2B] text-white shadow-sm
+                    {% else %}
+                        bg-white text-gray-700 border border-gray-300 hover:bg-gray-100
+                    {% endif %}"
+                >
                     Todos los productos
                 </a>
+
+
                 {% for cat in categorias %}
-                    <a href="?categoria={{ cat.id }}" class="px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition {% if categoria_activa == cat.id|slugify %}bg-[#071C2B] text-white shadow-sm{% else %}bg-white text-gray-700 border border-gray-300 hover:bg-gray-100{% endif %}">
+
+                    <a
+                        href="?categoria={{ cat.id }}"
+                        class="px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition
+                        {% if categoria_activa == cat.id|slugify %}
+                            bg-[#071C2B] text-white shadow-sm
+                        {% else %}
+                            bg-white text-gray-700 border border-gray-300 hover:bg-gray-100
+                        {% endif %}"
+                    >
                         {{ cat.nombre }}
                     </a>
+
                 {% endfor %}
+
             </div>
+
         </div>
 
-        <!-- Cuadrícula de Productos -->
+
+        <!-- ===================================================== -->
+        <!-- CUADRÍCULA DE PRODUCTOS -->
+        <!-- ===================================================== -->
+
         <div id="productContainer">
+
             <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+
                 {% for producto in productos %}
-                <div class="product-card bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm flex flex-col justify-between transition hover:shadow-md cursor-pointer group"
-                     data-name="{{ producto.nombre }}"
-                     data-price="{{ producto.precio|floatformat:0 }}"
-                     data-images='[{% if producto.imagen %}"{{ producto.imagen.url }}"{% endif %}{% for img in producto.imagenes.all %}, "{{ img.imagen.url }}"{% endfor %}]'
-                     data-desc="{{ producto.descripcion|default:'Sin descripción disponible por el momento.' }}"
-                     data-whatsapp="{{ producto.get_whatsapp_link }}">
-                    
-                    <div class="w-full h-40 bg-gray-100 relative overflow-hidden flex items-center justify-center">
+
+                <div
+                    class="product-card bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm flex flex-col justify-between transition hover:shadow-md cursor-pointer group"
+
+                    data-name="{{ producto.nombre }}"
+
+                    data-price="{{ producto.precio|floatformat:0 }}"
+
+                    data-images='[
                         {% if producto.imagen %}
-                            <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
-                        {% else %}
-                            <i class="fa-solid fa-image text-gray-300 text-3xl"></i>
+                            "{{ producto.imagen.url }}"
                         {% endif %}
+
+                        {% for img in producto.imagenes_adicionales.all %}
+                            , "{{ img.imagen.url }}"
+                        {% endfor %}
+                    ]'
+
+                    data-desc="{{ producto.descripcion|default:'Sin descripción disponible por el momento.' }}"
+
+                    data-whatsapp="{{ producto.get_whatsapp_link }}"
+                >
+
+                    <!-- Imagen principal -->
+
+                    <div class="w-full h-40 bg-gray-100 relative overflow-hidden flex items-center justify-center">
+
+                        {% if producto.imagen %}
+
+                            <img
+                                src="{{ producto.imagen.url }}"
+                                alt="{{ producto.nombre }}"
+                                class="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                            >
+
+                        {% else %}
+
+                            <i class="fa-solid fa-image text-gray-300 text-3xl"></i>
+
+                        {% endif %}
+
                     </div>
 
+
+                    <!-- Información -->
+
                     <div class="p-3 flex flex-col flex-grow justify-between">
+
                         <div>
+
                             <span class="text-[10px] uppercase font-semibold text-gray-400 tracking-wider">
-                                {% if producto.categoria %}{{ producto.categoria.nombre }}{% else %}General{% endif %}
+
+                                {% if producto.categoria %}
+                                    {{ producto.categoria.nombre }}
+                                {% else %}
+                                    General
+                                {% endif %}
+
                             </span>
-                            <h3 class="text-sm font-bold text-gray-800 line-clamp-2 mt-0.5">{{ producto.nombre }}</h3>
+
+
+                            <h3 class="text-sm font-bold text-gray-800 line-clamp-2 mt-0.5">
+                                {{ producto.nombre }}
+                            </h3>
+
                         </div>
 
+
                         <div class="mt-3">
+
                             <span class="text-base font-extrabold text-[#071C2B] block mb-2">
                                 ${{ producto.precio|floatformat:0 }}
                             </span>
+
+
                             <div class="w-full bg-gray-100 text-gray-700 hover:bg-gray-200 text-xs font-bold py-2 px-3 rounded-xl flex items-center justify-center space-x-1 transition">
+
                                 <i class="fa-solid fa-eye text-xs"></i>
-                                <span>Ver detalles</span>
+
+                                <span>
+                                    Ver detalles
+                                </span>
+
                             </div>
+
                         </div>
+
                     </div>
+
                 </div>
+
+
                 {% empty %}
+
                 <div class="col-span-full text-center py-12">
+
                     <i class="fa-solid fa-box-open text-gray-300 text-4xl mb-2"></i>
-                    <p class="text-sm text-gray-500">No se encontraron productos disponibles.</p>
+
+                    <p class="text-sm text-gray-500">
+                        No se encontraron productos disponibles.
+                    </p>
+
                 </div>
+
                 {% endfor %}
+
             </div>
+
         </div>
 
     </main>
 
-    <!-- VENTANA MODAL CON CARRUSEL -->
-    <div id="productModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
-        <div id="modalContent" class="bg-white w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl transform scale-95 transition-transform duration-300 flex flex-col max-h-[90vh]">
-            
+
+    <!-- ========================================================= -->
+    <!-- MODAL DE PRODUCTO -->
+    <!-- ========================================================= -->
+
+    <div
+        id="productModal"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300"
+    >
+
+        <div
+            id="modalContent"
+            class="bg-white w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl transform scale-95 transition-transform duration-300 flex flex-col max-h-[90vh]"
+        >
+
+
+            <!-- HEADER MODAL -->
+
             <div class="flex justify-between items-center p-4 border-b border-gray-100">
-                <span class="text-xs font-bold uppercase tracking-wider text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">Detalles del producto</span>
-                <button id="closeModalBtn" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition">
+
+                <span class="text-xs font-bold uppercase tracking-wider text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">
+                    Detalles del producto
+                </span>
+
+
+                <button
+                    id="closeModalBtn"
+                    class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition"
+                >
+
                     <i class="fa-solid fa-xmark text-lg"></i>
+
                 </button>
+
             </div>
+
+
+            <!-- CONTENIDO -->
 
             <div class="p-6 overflow-y-auto space-y-4">
-                <!-- CARRUSEL DE IMÁGENES -->
-                <div class="relative w-full h-64 bg-gray-900 rounded-2xl overflow-hidden flex items-center justify-center border border-gray-100 group">
-                    <div id="carouselTrack" class="flex w-full h-full overflow-x-auto snap-x snap-mandatory scrollbar-none scroll-smooth">
-                        <!-- Las imágenes se inyectan dinámicamente aquí -->
+
+
+                <!-- ================================================= -->
+                <!-- CARRUSEL -->
+                <!-- ================================================= -->
+
+                <div
+                    class="relative w-full h-64 bg-gray-900 rounded-2xl overflow-hidden flex items-center justify-center border border-gray-100 group"
+                >
+
+                    <div
+                        id="carouselTrack"
+                        class="flex w-full h-full overflow-x-auto snap-x snap-mandatory scrollbar-none scroll-smooth"
+                    >
+                        <!-- Imágenes generadas por JavaScript -->
                     </div>
 
-                    <!-- Botones de Navegación del Carrusel -->
-                    <button id="prevSlide" class="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-black/70 transition opacity-0 group-hover:opacity-150">
+
+                    <!-- BOTÓN ANTERIOR -->
+
+                    <button
+                        id="prevSlide"
+                        class="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-black/70 transition opacity-0 group-hover:opacity-100"
+                    >
+
                         <i class="fa-solid fa-chevron-left text-xs"></i>
+
                     </button>
-                    <button id="nextSlide" class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-black/70 transition opacity-0 group-hover:opacity-150">
+
+
+                    <!-- BOTÓN SIGUIENTE -->
+
+                    <button
+                        id="nextSlide"
+                        class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-black/70 transition opacity-0 group-hover:opacity-100"
+                    >
+
                         <i class="fa-solid fa-chevron-right text-xs"></i>
+
                     </button>
 
-                    <!-- Indicadores (Puntos) -->
-                    <div id="carouselDots" class="absolute bottom-2 left-1/2 -translate-x-1/2 flex space-x-1.5 z-10">
-                        <!-- Se generan dinámicamente -->
-                    </div>
+
+                    <!-- PUNTOS -->
+
+                    <div
+                        id="carouselDots"
+                        class="absolute bottom-2 left-1/2 -translate-x-1/2 flex space-x-1.5 z-10"
+                    ></div>
+
                 </div>
 
-                <div>
-                    <h2 id="modalTitle" class="text-xl font-black text-gray-900"></h2>
-                    <span id="modalPrice" class="text-2xl font-black text-[#071C2B] block mt-1"></span>
-                </div>
+
+                <!-- ================================================= -->
+                <!-- DATOS DEL PRODUCTO -->
+                <!-- ================================================= -->
 
                 <div>
-                    <h4 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Descripción</h4>
-                    <p id="modalDesc" class="text-sm text-gray-600 leading-relaxed whitespace-pre-line"></p>
+
+                    <h2
+                        id="modalTitle"
+                        class="text-xl font-black text-gray-900"
+                    ></h2>
+
+
+                    <span
+                        id="modalPrice"
+                        class="text-2xl font-black text-[#071C2B] block mt-1"
+                    ></span>
+
                 </div>
+
+
+                <div>
+
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">
+                        Descripción
+                    </h4>
+
+
+                    <p
+                        id="modalDesc"
+                        class="text-sm text-gray-600 leading-relaxed whitespace-pre-line"
+                    ></p>
+
+                </div>
+
             </div>
 
+
+            <!-- WHATSAPP -->
+
             <div class="p-4 border-t border-gray-100 bg-gray-50">
-                <a id="modalWhatsAppBtn" href="#" target="_blank" 
-                   class="w-full bg-[#25D366] hover:bg-[#20ba5a] text-white text-sm font-bold py-3 px-4 rounded-xl flex items-center justify-center space-x-2 shadow-sm transition">
+
+                <a
+                    id="modalWhatsAppBtn"
+                    href="#"
+                    target="_blank"
+                    class="w-full bg-[#25D366] hover:bg-[#20ba5a] text-white text-sm font-bold py-3 px-4 rounded-xl flex items-center justify-center space-x-2 shadow-sm transition"
+                >
+
                     <i class="fa-brands fa-whatsapp text-lg"></i>
-                    <span>Pedir por WhatsApp</span>
+
+                    <span>
+                        Pedir por WhatsApp
+                    </span>
+
                 </a>
+
             </div>
 
         </div>
+
     </div>
 
-    <!-- LIGHTBOX PARA VER IMAGEN AMPLIADA AL CENTRO -->
-    <div id="lightboxModal" class="fixed inset-0 z-60 bg-black/90 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
-        <button id="closeLightbox" class="absolute top-5 right-5 text-white text-3xl hover:text-gray-300 transition z-10">
+
+    <!-- ========================================================= -->
+    <!-- LIGHTBOX -->
+    <!-- ========================================================= -->
+
+    <div
+        id="lightboxModal"
+        class="fixed inset-0 z-[60] bg-black/90 flex items-center justify-center hidden opacity-0 transition-opacity duration-300"
+    >
+
+
+        <!-- BOTÓN CERRAR -->
+
+        <button
+            id="closeLightbox"
+            class="absolute top-5 right-5 w-10 h-10 rounded-full bg-black/50 text-white text-2xl hover:bg-black/70 hover:text-gray-300 transition z-30 flex items-center justify-center"
+        >
+
             <i class="fa-solid fa-xmark"></i>
+
         </button>
-        <img id="lightboxImg" src="" alt="Imagen ampliada" class="max-w-[90vw] max-h-[90vh] object-contain rounded-lg">
+
+
+        <!-- BOTÓN ANTERIOR -->
+
+        <button
+            id="lightboxPrev"
+            class="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70 transition z-30"
+        >
+
+            <i class="fa-solid fa-chevron-left"></i>
+
+        </button>
+
+
+        <!-- IMAGEN -->
+
+        <div class="relative flex items-center justify-center w-full h-full p-4 md:p-10">
+
+            <img
+                id="lightboxImg"
+                src=""
+                alt="Imagen ampliada"
+                class="max-w-[90vw] max-h-[90vh] object-contain rounded-lg select-none"
+            >
+
+        </div>
+
+
+        <!-- BOTÓN SIGUIENTE -->
+
+        <button
+            id="lightboxNext"
+            class="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70 transition z-30"
+        >
+
+            <i class="fa-solid fa-chevron-right"></i>
+
+        </button>
+
+
+        <!-- PUNTOS LIGHTBOX -->
+
+        <div
+            id="lightboxDots"
+            class="absolute bottom-6 left-1/2 -translate-x-1/2 flex space-x-1.5 z-30"
+        ></div>
+
     </div>
 
-    <!-- Pie de página -->
+
+    <!-- ========================================================= -->
+    <!-- FOOTER -->
+    <!-- ========================================================= -->
+
     <footer class="bg-white border-t border-gray-200 text-center py-4 mt-8 text-xs text-gray-500">
+
         &copy; 2026 JK Variedades. Todos los derechos reservados.
+
     </footer>
 
-    <!-- Script General y Carrusel -->
+
+    <!-- ========================================================= -->
+    <!-- JAVASCRIPT -->
+    <!-- ========================================================= -->
+
     <script>
+
+        /* ========================================================
+           ELEMENTOS DEL MODAL
+        ======================================================== */
+
         const modal = document.getElementById('productModal');
         const modalContent = document.getElementById('modalContent');
+
         const modalTitle = document.getElementById('modalTitle');
         const modalPrice = document.getElementById('modalPrice');
         const modalDesc = document.getElementById('modalDesc');
         const modalWhatsAppBtn = document.getElementById('modalWhatsAppBtn');
+
         const closeModalBtn = document.getElementById('closeModalBtn');
+
+
+        /* ========================================================
+           ELEMENTOS DEL CARRUSEL
+        ======================================================== */
 
         const carouselTrack = document.getElementById('carouselTrack');
         const carouselDots = document.getElementById('carouselDots');
+
         const prevSlideBtn = document.getElementById('prevSlide');
         const nextSlideBtn = document.getElementById('nextSlide');
 
+
+        /* ========================================================
+           ELEMENTOS DEL LIGHTBOX
+        ======================================================== */
+
         const lightboxModal = document.getElementById('lightboxModal');
         const lightboxImg = document.getElementById('lightboxImg');
+
         const closeLightbox = document.getElementById('closeLightbox');
 
+        const lightboxPrev = document.getElementById('lightboxPrev');
+        const lightboxNext = document.getElementById('lightboxNext');
+
+        const lightboxDots = document.getElementById('lightboxDots');
+
+
+        /* ========================================================
+           VARIABLES PRINCIPALES
+        ======================================================== */
+
         let currentSlideIndex = 0;
+
         let imagesArray = [];
 
+
+        /* ========================================================
+           ABRIR MODAL DEL PRODUCTO
+        ======================================================== */
+
         function openModalFromCard(card) {
+
             modalTitle.innerText = card.dataset.name;
+
             modalPrice.innerText = '$' + card.dataset.price;
+
             modalDesc.innerText = card.dataset.desc;
+
             modalWhatsAppBtn.href = card.dataset.whatsapp;
 
+
+            /* ----------------------------------------------------
+               OBTENER IMÁGENES DESDE DATA-IMAGES
+            ---------------------------------------------------- */
+
             try {
-                imagesArray = JSON.parse(card.dataset.images || '[]');
+
+                imagesArray = JSON.parse(
+                    card.dataset.images || '[]'
+                );
+
             } catch (e) {
+
+                console.error(
+                    'Error leyendo imágenes:',
+                    e
+                );
+
                 imagesArray = [];
+
             }
 
+
+            /* ----------------------------------------------------
+               LIMPIAR CARRUSEL
+            ---------------------------------------------------- */
+
             carouselTrack.innerHTML = '';
+
             carouselDots.innerHTML = '';
+
+            lightboxDots.innerHTML = '';
+
             currentSlideIndex = 0;
 
+
+            /* ====================================================
+               SI EXISTEN IMÁGENES
+            ==================================================== */
+
             if (imagesArray.length > 0) {
+
+
+                /* ------------------------------------------------
+                   CREAR SLIDES
+                ------------------------------------------------ */
+
                 imagesArray.forEach((imgUrl, index) => {
-                    // Slide individual con object-contain para evitar cortes
+
+
                     const slide = document.createElement('div');
-                    slide.className = 'w-full h-full flex-shrink-0 snap-center flex items-center justify-center cursor-pointer bg-black/5';
-                    slide.innerHTML = `<img src="${imgUrl}" alt="Foto ${index + 1}" class="w-full h-full object-contain transition hover:scale-102">`;
-                    
-                    // Evento para abrir el Lightbox al hacer clic en la imagen
-                    slide.querySelector('img').addEventListener('click', () => {
-                        lightboxImg.src = imgUrl;
-                        lightboxModal.classList.remove('hidden');
-                        setTimeout(() => lightboxModal.classList.remove('opacity-0'), 10);
+
+
+                    slide.className =
+                        'w-full h-full flex-shrink-0 snap-center flex items-center justify-center cursor-zoom-in bg-black/5';
+
+
+                    const img = document.createElement('img');
+
+
+                    img.src = imgUrl;
+
+                    img.alt = 'Foto ' + (index + 1);
+
+
+                    img.className =
+                        'w-full h-full object-contain transition';
+
+
+                    /* --------------------------------------------
+                       ABRIR LIGHTBOX
+                    -------------------------------------------- */
+
+                    img.addEventListener('click', (e) => {
+
+                        e.stopPropagation();
+
+                        openLightbox(index);
+
                     });
+
+
+                    slide.appendChild(img);
 
                     carouselTrack.appendChild(slide);
 
-                    // Punto indicador
+
+                    /* --------------------------------------------
+                       PUNTO DEL CARRUSEL
+                    -------------------------------------------- */
+
                     const dot = document.createElement('button');
-                    dot.className = `w-2 h-2 rounded-full transition ${index === 0 ? 'bg-white w-4' : 'bg-white/50'}`;
-                    dot.addEventListener('click', () => scrollToSlide(index));
+
+
+                    dot.className =
+                        `h-2 rounded-full transition-all duration-200 ${
+                            index === 0
+                                ? 'bg-white w-4'
+                                : 'bg-white/50 w-2'
+                        }`;
+
+
+                    dot.addEventListener('click', (e) => {
+
+                        e.stopPropagation();
+
+                        scrollToSlide(index);
+
+                    });
+
+
                     carouselDots.appendChild(dot);
+
                 });
 
-                prevSlideBtn.style.display = imagesArray.length > 1 ? 'flex' : 'none';
-                nextSlideBtn.style.display = imagesArray.length > 1 ? 'flex' : 'none';
-                carouselDots.style.display = imagesArray.length > 1 ? 'flex' : 'none';
+
+                /* ------------------------------------------------
+                   MOSTRAR / OCULTAR CONTROLES
+                ------------------------------------------------ */
+
+                const showControls =
+                    imagesArray.length > 1;
+
+
+                prevSlideBtn.style.display =
+                    showControls ? 'flex' : 'none';
+
+
+                nextSlideBtn.style.display =
+                    showControls ? 'flex' : 'none';
+
+
+                carouselDots.style.display =
+                    showControls ? 'flex' : 'none';
+
+
             } else {
-                carouselTrack.innerHTML = `<div class="w-full h-full flex items-center justify-center text-gray-400"><i class="fa-solid fa-image text-3xl"></i></div>`;
+
+
+                /* ------------------------------------------------
+                   SIN IMÁGENES
+                ------------------------------------------------ */
+
+                carouselTrack.innerHTML = `
+                    <div class="w-full h-full flex items-center justify-center text-gray-400">
+                        <i class="fa-solid fa-image text-3xl"></i>
+                    </div>
+                `;
+
+
                 prevSlideBtn.style.display = 'none';
+
                 nextSlideBtn.style.display = 'none';
+
                 carouselDots.style.display = 'none';
+
             }
+
+
+            /* ====================================================
+               MOSTRAR MODAL
+            ==================================================== */
 
             modal.classList.remove('hidden');
+
+
             setTimeout(() => {
+
                 modal.classList.remove('opacity-0');
+
                 modalContent.classList.remove('scale-95');
+
                 modalContent.classList.add('scale-100');
+
             }, 10);
+
+
             document.body.style.overflow = 'hidden';
+
         }
+
+
+        /* ========================================================
+           CAMBIAR SLIDE DEL CARRUSEL
+        ======================================================== */
 
         function scrollToSlide(index) {
+
             if (imagesArray.length === 0) return;
-            currentSlideIndex = (index + imagesArray.length) % imagesArray.length;
-            const slideWidth = carouselTrack.clientWidth;
-            carouselTrack.scrollTo({ left: slideWidth * currentSlideIndex, behavior: 'smooth' });
+
+
+            currentSlideIndex =
+                (index + imagesArray.length) %
+                imagesArray.length;
+
+
+            const slideWidth =
+                carouselTrack.clientWidth;
+
+
+            carouselTrack.scrollTo({
+
+                left:
+                    slideWidth *
+                    currentSlideIndex,
+
+                behavior: 'smooth'
+
+            });
+
+
             updateDots();
+
         }
+
+
+        /* ========================================================
+           ACTUALIZAR PUNTOS DEL CARRUSEL
+        ======================================================== */
 
         function updateDots() {
-            const dots = carouselDots.children;
-            for (let i = 0; i < dots.length; i++) {
-                dots[i].className = `w-2 h-2 rounded-full transition ${i === currentSlideIndex ? 'bg-white w-4' : 'bg-white/50'}`;
+
+            const dots =
+                carouselDots.children;
+
+
+            for (
+                let i = 0;
+                i < dots.length;
+                i++
+            ) {
+
+                dots[i].className =
+                    `h-2 rounded-full transition-all duration-200 ${
+                        i === currentSlideIndex
+                            ? 'bg-white w-4'
+                            : 'bg-white/50 w-2'
+                    }`;
+
             }
+
         }
 
-        prevSlideBtn.addEventListener('click', () => scrollToSlide(currentSlideIndex - 1));
-        nextSlideBtn.addEventListener('click', () => scrollToSlide(currentSlideIndex + 1));
 
-        carouselTrack.addEventListener('scroll', () => {
-            if (imagesArray.length === 0) return;
-            const slideWidth = carouselTrack.clientWidth;
-            const index = Math.round(carouselTrack.scrollLeft / slideWidth);
-            if (index !== currentSlideIndex) {
-                currentSlideIndex = index;
-                updateDots();
+        /* ========================================================
+           ABRIR LIGHTBOX
+        ======================================================== */
+
+        function openLightbox(index) {
+
+            if (imagesArray.length === 0) {
+                return;
             }
-        });
 
-        // Cerrar Lightbox
-        closeLightbox.addEventListener('click', () => {
-            lightboxModal.classList.add('opacity-0');
-            setTimeout(() => lightboxModal.classList.add('hidden'), 300);
-        });
+
+            /* --------------------------------------------
+               GUARDAR IMAGEN ACTUAL
+            -------------------------------------------- */
+
+            currentSlideIndex = index;
+
+
+            /* --------------------------------------------
+               MOSTRAR IMAGEN
+            -------------------------------------------- */
+
+            lightboxImg.src =
+                imagesArray[currentSlideIndex];
+
+
+            /* --------------------------------------------
+               CREAR PUNTOS DEL LIGHTBOX
+            -------------------------------------------- */
+
+            lightboxDots.innerHTML = '';
+
+
+            imagesArray.forEach(
+                (imgUrl, dotIndex) => {
+
+                    const dot =
+                        document.createElement('button');
+
+
+                    dot.className =
+                        `h-2 rounded-full transition-all duration-200 ${
+                            dotIndex === currentSlideIndex
+                                ? 'bg-white w-5'
+                                : 'bg-white/40 w-2'
+                        }`;
+
+
+                    dot.addEventListener(
+                        'click',
+                        (e) => {
+
+                            e.stopPropagation();
+
+                            currentSlideIndex =
+                                dotIndex;
+
+                            updateLightbox();
+
+                            scrollToSlide(
+                                currentSlideIndex
+                            );
+
+                        }
+                    );
+
+
+                    lightboxDots.appendChild(dot);
+
+                }
+            );
+
+
+            /* --------------------------------------------
+               MOSTRAR / OCULTAR CONTROLES
+            -------------------------------------------- */
+
+            if (imagesArray.length > 1) {
+
+                lightboxPrev.style.display = 'flex';
+
+                lightboxNext.style.display = 'flex';
+
+                lightboxDots.style.display = 'flex';
+
+            } else {
+
+                lightboxPrev.style.display = 'none';
+
+                lightboxNext.style.display = 'none';
+
+                lightboxDots.style.display = 'none';
+
+            }
+
+
+            /* --------------------------------------------
+               ABRIR LIGHTBOX
+            -------------------------------------------- */
+
+            lightboxModal.classList.remove('hidden');
+
+
+            setTimeout(() => {
+
+                lightboxModal.classList.remove(
+                    'opacity-0'
+                );
+
+            }, 10);
+
+        }
+
+
+        /* ========================================================
+           ACTUALIZAR LIGHTBOX
+        ======================================================== */
+
+        function updateLightbox() {
+
+            if (imagesArray.length === 0) {
+                return;
+            }
+
+
+            /* --------------------------------------------
+               CAMBIAR IMAGEN
+            -------------------------------------------- */
+
+            lightboxImg.src =
+                imagesArray[currentSlideIndex];
+
+
+            /* --------------------------------------------
+               ACTUALIZAR PUNTOS
+            -------------------------------------------- */
+
+            const dots =
+                lightboxDots.children;
+
+
+            for (
+                let i = 0;
+                i < dots.length;
+                i++
+            ) {
+
+                dots[i].className =
+                    `h-2 rounded-full transition-all duration-200 ${
+                        i === currentSlideIndex
+                            ? 'bg-white w-5'
+                            : 'bg-white/40 w-2'
+                    }`;
+
+            }
+
+        }
+
+
+        /* ========================================================
+           BOTÓN ANTERIOR DEL CARRUSEL
+        ======================================================== */
+
+        prevSlideBtn.addEventListener(
+            'click',
+            (e) => {
+
+                e.stopPropagation();
+
+                scrollToSlide(
+                    currentSlideIndex - 1
+                );
+
+            }
+        );
+
+
+        /* ========================================================
+           BOTÓN SIGUIENTE DEL CARRUSEL
+        ======================================================== */
+
+        nextSlideBtn.addEventListener(
+            'click',
+            (e) => {
+
+                e.stopPropagation();
+
+                scrollToSlide(
+                    currentSlideIndex + 1
+                );
+
+            }
+        );
+
+
+        /* ========================================================
+           BOTÓN ANTERIOR DEL LIGHTBOX
+        ======================================================== */
+
+        lightboxPrev.addEventListener(
+            'click',
+            (e) => {
+
+                e.stopPropagation();
+
+
+                if (imagesArray.length <= 1) {
+                    return;
+                }
+
+
+                currentSlideIndex--;
+
+
+                if (currentSlideIndex < 0) {
+
+                    currentSlideIndex =
+                        imagesArray.length - 1;
+
+                }
+
+
+                updateLightbox();
+
+
+                /* --------------------------------------------
+                   MOVER TAMBIÉN EL CARRUSEL
+                -------------------------------------------- */
+
+                scrollToSlide(
+                    currentSlideIndex
+                );
+
+            }
+        );
+
+
+        /* ========================================================
+           BOTÓN SIGUIENTE DEL LIGHTBOX
+        ======================================================== */
+
+        lightboxNext.addEventListener(
+            'click',
+            (e) => {
+
+                e.stopPropagation();
+
+
+                if (imagesArray.length <= 1) {
+                    return;
+                }
+
+
+                currentSlideIndex++;
+
+
+                if (
+                    currentSlideIndex >=
+                    imagesArray.length
+                ) {
+
+                    currentSlideIndex = 0;
+
+                }
+
+
+                updateLightbox();
+
+
+                /* --------------------------------------------
+                   MOVER TAMBIÉN EL CARRUSEL
+                -------------------------------------------- */
+
+                scrollToSlide(
+                    currentSlideIndex
+                );
+
+            }
+        );
+
+
+        /* ========================================================
+           SCROLL MANUAL DEL CARRUSEL
+        ======================================================== */
+
+        carouselTrack.addEventListener(
+            'scroll',
+            () => {
+
+                if (imagesArray.length === 0) {
+                    return;
+                }
+
+
+                const slideWidth =
+                    carouselTrack.clientWidth;
+
+
+                if (slideWidth === 0) {
+                    return;
+                }
+
+
+                const index =
+                    Math.round(
+                        carouselTrack.scrollLeft /
+                        slideWidth
+                    );
+
+
+                if (
+                    index !==
+                    currentSlideIndex
+                ) {
+
+                    currentSlideIndex =
+                        index;
+
+                    updateDots();
+
+                }
+
+            }
+        );
+
+
+        /* ========================================================
+           CERRAR LIGHTBOX
+        ======================================================== */
+
+        function closeLightboxModal() {
+
+            lightboxModal.classList.add(
+                'opacity-0'
+            );
+
+
+            setTimeout(() => {
+
+                lightboxModal.classList.add(
+                    'hidden'
+                );
+
+            }, 300);
+
+        }
+
+
+        closeLightbox.addEventListener(
+            'click',
+            (e) => {
+
+                e.stopPropagation();
+
+                closeLightboxModal();
+
+            }
+        );
+
+
+        /* ========================================================
+           CERRAR LIGHTBOX AL HACER CLICK EN EL FONDO
+        ======================================================== */
+
+        lightboxModal.addEventListener(
+            'click',
+            (e) => {
+
+                if (
+                    e.target ===
+                    lightboxModal
+                ) {
+
+                    closeLightboxModal();
+
+                }
+
+            }
+        );
+
+
+        /* ========================================================
+           TECLADO
+        ======================================================== */
+
+        document.addEventListener(
+            'keydown',
+            (e) => {
+
+                /* Solo actuar si Lightbox está abierto */
+
+                if (
+                    lightboxModal.classList.contains(
+                        'hidden'
+                    )
+                ) {
+
+                    return;
+
+                }
+
+
+                /* Flecha izquierda */
+
+                if (
+                    e.key ===
+                    'ArrowLeft'
+                ) {
+
+                    lightboxPrev.click();
+
+                }
+
+
+                /* Flecha derecha */
+
+                if (
+                    e.key ===
+                    'ArrowRight'
+                ) {
+
+                    lightboxNext.click();
+
+                }
+
+
+                /* Escape */
+
+                if (
+                    e.key ===
+                    'Escape'
+                ) {
+
+                    closeLightboxModal();
+
+                }
+
+            }
+        );
+
+
+        /* ========================================================
+           CERRAR MODAL PRINCIPAL
+        ======================================================== */
 
         function closeModal() {
-            modal.classList.add('opacity-0');
-            modalContent.classList.remove('scale-100');
-            modalContent.classList.add('scale-95');
+
+            modal.classList.add(
+                'opacity-0'
+            );
+
+
+            modalContent.classList.remove(
+                'scale-100'
+            );
+
+
+            modalContent.classList.add(
+                'scale-95'
+            );
+
+
             setTimeout(() => {
-                modal.classList.add('hidden');
+
+                modal.classList.add(
+                    'hidden'
+                );
+
             }, 300);
-            document.body.style.overflow = 'auto';
+
+
+            document.body.style.overflow =
+                'auto';
+
         }
 
-        document.addEventListener('click', function(e) {
-            const card = e.target.closest('.product-card');
-            if (card) {
-                openModalFromCard(card);
+
+        /* ========================================================
+           ABRIR PRODUCTO
+        ======================================================== */
+
+        document.addEventListener(
+            'click',
+            function(e) {
+
+                const card =
+                    e.target.closest(
+                        '.product-card'
+                    );
+
+
+                if (card) {
+
+                    openModalFromCard(card);
+
+                }
+
             }
-        });
+        );
 
-        closeModalBtn.addEventListener('click', closeModal);
-        modal.addEventListener('click', function(e) {
-            if (e.target === modal) closeModal();
-        });
 
-        // Búsqueda Dinámica (manteniendo tu lógica existente)
-        const searchInput = document.getElementById('searchInput');
-        const clearSearch = document.getElementById('clearSearch');
-        const productContainer = document.getElementById('productContainer');
+        /* ========================================================
+           BOTÓN CERRAR MODAL
+        ======================================================== */
+
+        closeModalBtn.addEventListener(
+            'click',
+            closeModal
+        );
+
+
+        /* ========================================================
+           CERRAR MODAL AL HACER CLICK AFUERA
+        ======================================================== */
+
+        modal.addEventListener(
+            'click',
+            function(e) {
+
+                if (
+                    e.target ===
+                    modal
+                ) {
+
+                    closeModal();
+
+                }
+
+            }
+        );
+
+
+        /* ========================================================
+           BÚSQUEDA DINÁMICA
+        ======================================================== */
+
+        const searchInput =
+            document.getElementById(
+                'searchInput'
+            );
+
+
+        const clearSearch =
+            document.getElementById(
+                'clearSearch'
+            );
+
+
+        const productContainer =
+            document.getElementById(
+                'productContainer'
+            );
+
+
         let timeout = null;
 
+
+        /* ========================================================
+           BOTÓN LIMPIAR BÚSQUEDA
+        ======================================================== */
+
         function toggleClearButton() {
-            if (searchInput.value.length > 0) {
-                clearSearch.classList.remove('hidden');
+
+            if (
+                searchInput.value.length > 0
+            ) {
+
+                clearSearch.classList.remove(
+                    'hidden'
+                );
+
             } else {
-                clearSearch.classList.add('hidden');
+
+                clearSearch.classList.add(
+                    'hidden'
+                );
+
             }
+
         }
+
 
         toggleClearButton();
 
-        searchInput.addEventListener('input', function() {
-            toggleClearButton();
-            clearTimeout(timeout);
-            
-            const query = this.value;
-            const currentUrl = new URL(window.location.href);
-            if (query) {
-                currentUrl.searchParams.set('q', query);
-            } else {
-                currentUrl.searchParams.delete('q');
+
+        /* ========================================================
+           INPUT DE BÚSQUEDA
+        ======================================================== */
+
+        searchInput.addEventListener(
+            'input',
+            function() {
+
+                toggleClearButton();
+
+                clearTimeout(timeout);
+
+
+                const query =
+                    this.value;
+
+
+                const currentUrl =
+                    new URL(
+                        window.location.href
+                    );
+
+
+                if (query) {
+
+                    currentUrl.searchParams.set(
+                        'q',
+                        query
+                    );
+
+                } else {
+
+                    currentUrl.searchParams.delete(
+                        'q'
+                    );
+
+                }
+
+
+                timeout = setTimeout(
+                    () => {
+
+                        fetch(
+                            currentUrl.toString(),
+                            {
+                                headers: {
+                                    'X-Requested-With':
+                                        'XMLHttpRequest'
+                                }
+                            }
+                        )
+
+                        .then(
+                            response =>
+                                response.text()
+                        )
+
+                        .then(
+                            html => {
+
+                                const parser =
+                                    new DOMParser();
+
+
+                                const doc =
+                                    parser.parseFromString(
+                                        html,
+                                        'text/html'
+                                    );
+
+
+                                productContainer.innerHTML =
+                                    doc.getElementById(
+                                        'productContainer'
+                                    ).innerHTML;
+
+
+                                window.history.replaceState(
+                                    {},
+                                    '',
+                                    currentUrl.toString()
+                                );
+
+                            }
+                        );
+
+                    },
+                    300
+                );
+
             }
+        );
 
-            timeout = setTimeout(() => {
-                fetch(currentUrl.toString(), {
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                })
-                .then(response => response.text())
-                .then(html => {
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(html, 'text/html');
-                    productContainer.innerHTML = doc.getElementById('productContainer').innerHTML;
-                    window.history.replaceState({}, '', currentUrl.toString());
-                });
-            }, 300);
-        });
 
-        clearSearch.addEventListener('click', function() {
-            searchInput.value = '';
-            toggleClearButton();
-            const currentUrl = new URL(window.location.href);
-            currentUrl.searchParams.delete('q');
-            
-            fetch(currentUrl.toString(), {
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
-            })
-            .then(response => response.text())
-            .then(html => {
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                productContainer.innerHTML = doc.getElementById('productContainer').innerHTML;
-                window.history.replaceState({}, '', currentUrl.toString());
-            });
-            searchInput.focus();
-        });
+        /* ========================================================
+           LIMPIAR BÚSQUEDA
+        ======================================================== */
+
+        clearSearch.addEventListener(
+            'click',
+            function() {
+
+                searchInput.value = '';
+
+                toggleClearButton();
+
+
+                const currentUrl =
+                    new URL(
+                        window.location.href
+                    );
+
+
+                currentUrl.searchParams.delete(
+                    'q'
+                );
+
+
+                fetch(
+                    currentUrl.toString(),
+                    {
+                        headers: {
+                            'X-Requested-With':
+                                'XMLHttpRequest'
+                        }
+                    }
+                )
+
+                .then(
+                    response =>
+                        response.text()
+                )
+
+                .then(
+                    html => {
+
+                        const parser =
+                            new DOMParser();
+
+
+                        const doc =
+                            parser.parseFromString(
+                                html,
+                                'text/html'
+                            );
+
+
+                        productContainer.innerHTML =
+                            doc.getElementById(
+                                'productContainer'
+                            ).innerHTML;
+
+
+                        window.history.replaceState(
+                            {},
+                            '',
+                            currentUrl.toString()
+                        );
+
+                    }
+                );
+
+
+                searchInput.focus();
+
+            }
+        );
+
     </script>
 
 </body>

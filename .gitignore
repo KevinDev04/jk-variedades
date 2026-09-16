@@ -3,3 +3,4 @@ core/settings_local.py
 __pycache__/
 *.pyc
 media/
+db.sqlite3
