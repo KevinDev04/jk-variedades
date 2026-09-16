@@ -43,8 +43,6 @@ INSTALLED_APPS = [
 ]
 
 # Configuración de archivos multimedia (Imágenes de productos)
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
