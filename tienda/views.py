@@ -1,5 +1,8 @@
 from django.shortcuts import render
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 from .models import Producto, Categoria, ConfiguracionTienda
+from .serializers import ProductoSerializer
 
 def catalogo_view(request):
     categorias = Categoria.objects.all()
@@ -23,3 +26,13 @@ def catalogo_view(request):
         'configuracion': configuracion, # <- Lo pasamos aquí
     }
     return render(request, 'tienda/catalogo.html', context)
+
+@api_view(['GET'])
+def productos_json(request):
+    # prefetch_related evita hacer una consulta extra por cada producto
+    # al pedir sus imágenes adicionales (problema N+1)
+    productos = Producto.objects.all().order_by('-creado').prefetch_related('imagenes_adicionales')
+
+    serializer = ProductoSerializer(productos, many=True, context={'request': request})
+
+    return Response({'productos': serializer.data})

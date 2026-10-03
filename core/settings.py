@@ -22,12 +22,21 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-y$6gm8^9#1a9u@*=5n=#)80k5cgcv#(3oy!l^&omx1z!u@)#3f'
+# La SECRET_KEY se toma de una variable de entorno en producción.
+# El valor de respaldo solo se usa en desarrollo local.
+SECRET_KEY = os.environ.get(
+    'SECRET_KEY',
+    'django-insecure-y$6gm8^9#1a9u@*=5n=#)80k5cgcv#(3oy!l^&omx1z!u@)#3f'
+)
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# DEBUG debe ser False en producción. Se controla con la variable de entorno.
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['*']
+# En producción se define ALLOWED_HOSTS como variable de entorno,
+# por ejemplo: "tu-backend.onrender.com,localhost,127.0.0.1"
+ALLOWED_HOSTS = os.environ.get(
+    'ALLOWED_HOSTS', 'localhost,127.0.0.1'
+).split(',')
 
 
 # Application definition
@@ -39,13 +48,19 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
+    'rest_framework',
     'tienda',
+    
 ]
 
 # Configuración de archivos multimedia (Imágenes de productos)
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    # CorsMiddleware debe ir lo más arriba posible para que las
+    # cabeceras CORS se apliquen incluso a respuestas de error.
+    'corsheaders.middleware.CorsMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -124,6 +139,11 @@ STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+# Archivos multimedia subidos por el usuario.
+# En desarrollo se sirven desde /media/ (settings_local.py lo configura).
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
 
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
@@ -134,26 +154,44 @@ MAILERS = {
     },
 }
 
-STORAGES = {
-    "default": {
-        "BACKEND": "storages.backends.s3.S3Storage",
-    },
-    "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-    },
-}
-
 AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME")
 AWS_S3_ENDPOINT_URL = os.environ.get("AWS_S3_ENDPOINT_URL")
 AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME")
 AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
-AWS_S3_CUSTOM_DOMAIN = "grjvoogodesjynllprsz.supabase.co/storage/v1/object/public/product-imagenes"
+AWS_S3_CUSTOM_DOMAIN = os.environ.get("AWS_S3_CUSTOM_DOMAIN")
 AWS_QUERYSTRING_AUTH = False
 AWS_DEFAULT_ACL = None
+
+CORS_ALLOWED_ORIGINS = os.environ.get(
+    'CORS_ALLOWED_ORIGINS', 'http://localhost:5173'
+).split(',')
+
+# Si están configuradas las variables de Supabase (producción),
+# las imágenes se suben a Supabase Storage (S3).
+# Si no, se guardan en el disco local (desarrollo).
+if AWS_STORAGE_BUCKET_NAME:
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3.S3Storage",
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+    }
+else:
+    STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+    }
 
 
 try:
     from .settings_local import *
 except ImportError:
     pass
+
