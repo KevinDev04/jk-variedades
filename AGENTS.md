@@ -396,7 +396,7 @@ npm run build
 
 ## Trampas conocidas
 
-- `frontend/.env.production` tiene el placeholder `tu-backend.onrender.com`: editarlo antes de desplegar en Cloudflare Pages.
+- El backend en producción es https://jk-variedades.onrender.com. En Cloudflare Pages la variable VITE_API_URL debe apuntar ahí.
 - `requeriments.txt` fue eliminado intencionalmente; el único archivo de dependencias es `requirements.txt`.
 - WhatsApp del catálogo está hardcodeado en `Producto.get_whatsapp_link()` (`tienda/models.py`).
 - `CorsMiddleware` debe permanecer arriba del `MIDDLEWARE` (después de `SecurityMiddleware`) o CORS falla en errores/redirects.

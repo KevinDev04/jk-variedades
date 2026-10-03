@@ -14,7 +14,7 @@ Memoria del proyecto entre sesiones. Mantener breve y actualizada.
 - React consume la API en local y muestra productos, buscador y filtros por categoría.
 - Imágenes locales funcionando en React (URLs relativas completadas con `VITE_API_URL`).
 - Producción del frontend: Cloudflare Pages (pendiente de desplegar).
-- `frontend/.env.production` aún tiene el placeholder de la URL de Render.
+- `frontend/.env.production` ya apunta a https://jk-variedades.onrender.com (no versionado; definir VITE_API_URL también en Cloudflare Pages).
 
 ## Arquitectura
 
