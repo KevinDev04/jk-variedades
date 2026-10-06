@@ -3,6 +3,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Producto, Categoria, ConfiguracionTienda
 from .serializers import ProductoSerializer
+from django.http import JsonResponse
 
 def catalogo_view(request):
     categorias = Categoria.objects.all()
@@ -36,3 +37,9 @@ def productos_json(request):
     serializer = ProductoSerializer(productos, many=True, context={'request': request})
 
     return Response({'productos': serializer.data})
+
+
+def health_check(request):
+    return JsonResponse({
+        'status': 'ok'
+    })
