@@ -13,8 +13,10 @@ Memoria del proyecto entre sesiones. Mantener breve y actualizada.
 - Frontend separado: React + TypeScript + Vite + Tailwind.
 - React consume la API en local y muestra productos, buscador y filtros por categoría.
 - Imágenes locales funcionando en React (URLs relativas completadas con `VITE_API_URL`).
-- Producción del frontend: Cloudflare Pages (pendiente de desplegar).
-- `frontend/.env.production` ya apunta a https://jk-variedades.onrender.com (no versionado; definir VITE_API_URL también en Cloudflare Pages).
+- Producción del frontend: Cloudflare Pages — frontend desplegado en https://jk-variedades.kevindeveloper07.workers.dev.
+- Backend en producción: https://jk-variedades.onrender.com (Live, con /api/health/ keep-alive vía UptimeRobot).
+- Frontend rediseñado (commit "Reconstrucción de frontend"): paleta navy/azul/cyan, Hero, buscador, categorías pill, tarjetas con object-fit: contain, modal de detalle con galería, carrito con localStorage + WhatsApp, navegación inferior móvil.
+- `frontend/.env.production` apunta a https://jk-variedades.onrender.com.
 
 ## Arquitectura
 

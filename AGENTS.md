@@ -397,6 +397,7 @@ npm run build
 ## Trampas conocidas
 
 - El backend en producción es https://jk-variedades.onrender.com. En Cloudflare Pages la variable VITE_API_URL debe apuntar ahí.
+- El frontend fue reconstruido: paleta navy/azul/cyan, carrito en localStorage, modal de detalle, navegación inferior móvil.
 - `requeriments.txt` fue eliminado intencionalmente; el único archivo de dependencias es `requirements.txt`.
 - WhatsApp del catálogo está hardcodeado en `Producto.get_whatsapp_link()` (`tienda/models.py`).
 - `CorsMiddleware` debe permanecer arriba del `MIDDLEWARE` (después de `SecurityMiddleware`) o CORS falla en errores/redirects.
