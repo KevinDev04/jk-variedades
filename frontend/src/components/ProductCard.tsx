@@ -5,9 +5,11 @@ interface ProductCardProps {
   category: string
   featured: boolean
   whatsapp: string
+  onView?: () => void
+  onAddToCart?: () => void
 }
 
-function ProductCard({ name, price, image, category, featured, whatsapp }: ProductCardProps) {
+function ProductCard({ name, price, image, category, featured, onView, onAddToCart }: ProductCardProps) {
   // En desarrollo la API devuelve rutas relativas (/media/...),
   // así que las completamos con la URL del backend
   const imageUrl = image
@@ -16,48 +18,57 @@ function ProductCard({ name, price, image, category, featured, whatsapp }: Produ
       : `${import.meta.env.VITE_API_URL}${image}`
     : null
 
-  return (
-    <article className="overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-md">
+  // Formato colombiano sin centavos: $53.000
+  const formattedPrice = `$${Math.round(price).toLocaleString('es-CO')}`
 
-      <div className="relative aspect-square bg-gray-100">
+  return (
+    <article className="flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-navy-deep shadow-lg transition hover:border-electric/40">
+
+      <div className="relative aspect-square bg-black/20">
         {imageUrl ? (
           <img
             src={imageUrl}
             alt={name}
-            className="h-full w-full object-cover"
+            className="h-full w-full object-contain p-2"
           />
         ) : (
-          <div className="flex h-full items-center justify-center text-gray-400">
+          <div className="flex h-full items-center justify-center text-grayblue">
             Sin imagen
           </div>
         )}
 
         {featured && (
-          <span className="absolute left-2 top-2 rounded-full bg-yellow-400 px-2 py-1 text-xs font-bold text-gray-900">
+          <span className="absolute left-2 top-2 rounded-full bg-cyan px-2 py-1 text-xs font-bold text-navy-deep">
             ★ Destacado
           </span>
         )}
       </div>
 
-      <div className="p-4">
-        <p className="text-xs uppercase text-gray-400">{category}</p>
+      <div className="flex flex-1 flex-col p-4">
+        <p className="text-xs uppercase tracking-wide text-grayblue">{category}</p>
 
-        <h2 className="font-semibold text-gray-900">
+        <h2 className="mt-1 font-semibold text-snow">
           {name}
         </h2>
 
-        <p className="mt-2 text-lg font-bold text-blue-600">
-          ${price.toLocaleString('es-CO')}
+        <p className="mt-2 text-xl font-bold text-cyan">
+          {formattedPrice}
         </p>
 
-        <a
-          href={whatsapp}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-3 block rounded-lg bg-green-500 px-4 py-2 text-center text-sm font-semibold text-white hover:bg-green-600"
-        >
-          Comprar por WhatsApp
-        </a>
+        <div className="mt-4 flex gap-2">
+          <button
+            onClick={onView}
+            className="flex-1 rounded-full border border-electric px-3 py-2 text-sm font-semibold text-electric transition hover:bg-electric/10"
+          >
+            Ver
+          </button>
+          <button
+            onClick={onAddToCart}
+            className="flex-1 rounded-full bg-electric px-3 py-2 text-sm font-semibold text-white transition hover:opacity-90"
+          >
+            + Carrito
+          </button>
+        </div>
       </div>
 
     </article>

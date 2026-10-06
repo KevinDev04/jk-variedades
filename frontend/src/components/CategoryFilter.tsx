@@ -11,10 +11,10 @@ function CategoryFilter({ categories, selected, onSelect }: CategoryFilterProps)
         <button
           key={category}
           onClick={() => onSelect(category)}
-          className={`whitespace-nowrap rounded-full border px-4 py-2 text-sm ${
+          className={`whitespace-nowrap rounded-full border px-4 py-2 text-sm transition ${
             selected === category
-              ? 'border-blue-500 bg-blue-50 text-blue-700'
-              : 'border-gray-300 hover:bg-gray-100'
+              ? 'border-electric bg-electric text-white'
+              : 'border-white/10 bg-navy-deep text-grayblue hover:border-cyan'
           }`}
         >
           {category}

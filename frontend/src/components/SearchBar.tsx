@@ -11,7 +11,7 @@ function SearchBar({ value, onChange }: SearchBarProps) {
         placeholder="Buscar productos..."
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-blue-500"
+        className="w-full rounded-full border border-white/10 bg-navy-deep px-5 py-3 text-snow placeholder-grayblue outline-none focus:border-electric"
       />
     </div>
   )

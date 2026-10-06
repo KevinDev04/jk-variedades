@@ -1,1 +1,16 @@
 @import "tailwindcss";
+
+/* Paleta de identidad JK Variedades (Tailwind v4) */
+@theme {
+  --color-navy: #061426;       /* Fondo principal */
+  --color-navy-deep: #030b16;  /* Fondo profundo */
+  --color-electric: #006dff;   /* Azul eléctrico */
+  --color-cyan: #00d9ff;       /* Cyan tecnológico */
+  --color-snow: #f5f8ff;       /* Blanco */
+  --color-grayblue: #8ea2bc;   /* Gris azulado */
+}
+
+body {
+  background-color: var(--color-navy);
+  color: var(--color-snow);
+}

@@ -1,17 +1,17 @@
+import logo from '../assets/logo.png'
+
 function Header() {
   return (
-    <header className="border-b bg-white">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
-        
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            JK Variedades
-          </h1>
-        </div>
+    <header className="border-b border-white/10 bg-navy">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
 
-        <div className="text-sm text-gray-500">
+        <a href="/" className="flex items-center gap-2">
+          <img src={logo} alt="JK Variedades" className="h-10 w-auto" />
+        </a>
+
+        <p className="text-xs text-grayblue">
           Tu tienda de confianza
-        </div>
+        </p>
 
       </div>
     </header>
