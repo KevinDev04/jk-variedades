@@ -96,15 +96,15 @@ function App() {
 
       <Header />
 
-      <main className="mx-auto max-w-7xl px-4 py-8 pb-24">
+      <main className="mx-auto max-w-7xl px-4 py-4 pb-24">
 
         <Hero />
 
-        <section className="mt-8 mb-6">
+        <section className="mt-4 mb-4">
           <SearchBar value={search} onChange={setSearch} />
         </section>
 
-        <section className="mb-8">
+        <section className="mb-5">
           <CategoryFilter
             categories={categories}
             selected={category}
@@ -159,13 +159,15 @@ function App() {
       {/* Navegación inferior fija (móvil) */}
       <BottomNav cartCount={cartCount} onOpenCart={() => setCartOpen(true)} />
 
-      {/* Botón flotante del carrito */}
-      <button
-        onClick={() => setCartOpen(true)}
-        className="fixed bottom-20 right-4 z-40 rounded-full bg-electric px-5 py-3 font-semibold text-white shadow-lg transition hover:opacity-90 sm:hidden"
-      >
-        🛒 {cartCount}
-      </button>
+      {/* Botón flotante del carrito: solo visible en móvil y con productos */}
+      {cartCount > 0 && (
+        <button
+          onClick={() => setCartOpen(true)}
+          className="fixed bottom-20 right-4 z-40 rounded-full bg-electric px-4 py-2 text-sm font-semibold text-white shadow-lg transition hover:opacity-90 sm:hidden"
+        >
+          🛒 {cartCount}
+        </button>
+      )}
 
       <Footer />
 
