@@ -29,42 +29,42 @@ function ProductCard({ name, price, image, category, featured, onView, onAddToCa
           <img
             src={imageUrl}
             alt={name}
-            className="h-full w-full object-contain p-2"
+            className="h-full w-full object-contain p-1.5"
           />
         ) : (
-          <div className="flex h-full items-center justify-center text-grayblue">
+          <div className="flex h-full items-center justify-center text-xs text-grayblue">
             Sin imagen
           </div>
         )}
 
         {featured && (
-          <span className="absolute left-2 top-2 rounded-full bg-cyan px-2 py-1 text-xs font-bold text-navy-deep">
+          <span className="absolute left-1.5 top-1.5 rounded-full bg-cyan px-1.5 py-0.5 text-[10px] font-bold text-navy-deep">
             ★ Destacado
           </span>
         )}
       </div>
 
-      <div className="flex flex-1 flex-col p-4">
-        <p className="text-xs uppercase tracking-wide text-grayblue">{category}</p>
+      <div className="flex flex-1 flex-col p-2.5">
+        <p className="truncate text-[10px] uppercase tracking-wide text-grayblue">{category}</p>
 
-        <h2 className="mt-1 font-semibold text-snow">
+        <h2 className="mt-0.5 line-clamp-2 text-sm font-semibold leading-snug text-snow">
           {name}
         </h2>
 
-        <p className="mt-2 text-xl font-bold text-cyan">
+        <p className="mt-1 text-base font-bold text-cyan sm:text-lg">
           {formattedPrice}
         </p>
 
-        <div className="mt-4 flex gap-2">
+        <div className="mt-2.5 flex gap-2">
           <button
             onClick={onView}
-            className="flex-1 rounded-full border border-electric px-3 py-2 text-sm font-semibold text-electric transition hover:bg-electric/10"
+            className="flex-1 rounded-full border border-electric px-2 py-1.5 text-xs font-semibold text-electric transition hover:bg-electric/10"
           >
             Ver
           </button>
           <button
             onClick={onAddToCart}
-            className="flex-1 rounded-full bg-electric px-3 py-2 text-sm font-semibold text-white transition hover:opacity-90"
+            className="flex-1 rounded-full bg-electric px-2 py-1.5 text-xs font-semibold text-white transition hover:opacity-90"
           >
             + Carrito
           </button>

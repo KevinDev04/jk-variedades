@@ -4,7 +4,6 @@ import SearchBar from './components/SearchBar'
 import CategoryFilter from './components/CategoryFilter'
 import ProductCard from './components/ProductCard'
 import Footer from './components/Footer'
-import Hero from './components/Hero'
 import ProductDetail from './components/ProductDetail'
 import Cart from './components/Cart'
 import type { CartItem } from './components/Cart'
@@ -96,15 +95,13 @@ function App() {
 
       <Header />
 
-      <main className="mx-auto max-w-7xl px-4 py-4 pb-24">
+      <main className="mx-auto max-w-7xl px-4 py-3 pb-24">
 
-        <Hero />
-
-        <section className="mt-4 mb-4">
+        <section className="mt-1 mb-3">
           <SearchBar value={search} onChange={setSearch} />
         </section>
 
-        <section className="mb-5">
+        <section className="mb-3">
           <CategoryFilter
             categories={categories}
             selected={category}
@@ -113,11 +110,11 @@ function App() {
         </section>
 
         <section>
-          <h2 id="catalogo" className="mb-4 text-2xl font-bold text-snow">
+          <h2 id="catalogo" className="mb-3 text-xl font-bold text-snow">
             Productos
           </h2>
 
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
             {filtered.map((product) => (
               <ProductCard
                 key={product.id}

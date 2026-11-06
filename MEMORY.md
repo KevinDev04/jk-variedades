@@ -15,8 +15,8 @@ Memoria del proyecto entre sesiones. Mantener breve y actualizada.
 - Imágenes locales funcionando en React (URLs relativas completadas con `VITE_API_URL`).
 - Producción del frontend: Cloudflare Pages — frontend desplegado en https://jk-variedades.kevindeveloper07.workers.dev.
 - Backend en producción: https://jk-variedades.onrender.com (Live, con /api/health/ keep-alive vía UptimeRobot).
-- Frontend rediseñado (commit "Reconstrucción de frontend"): paleta navy/azul/cyan, Hero, buscador, categorías pill, tarjetas con object-fit: contain, modal de detalle con galería, carrito con localStorage + WhatsApp, navegación inferior móvil.
-- Iteración visual 2 (commit "Iteración visual"): logo centrado y más grande (h-16/h-20), hero compacto, "Tu tienda de confianza" movido al hero, carrito flotante solo visible con productos.
+- Frontend rediseñado: paleta navy/azul/cyan, buscador, categorías pill, tarjetas con object-fit: contain, modal de detalle con galería, carrito con localStorage + WhatsApp, navegación inferior móvil.
+- Iteración visual 3 (commit "Iteración visual 3"): sin Hero (eliminado `Hero.tsx`), logo más protagonista (h-20/md:h-24) + eslogan sutil en header, jerarquía LOGO→BUSCADOR→CATEGORÍAS→PRODUCTOS, grilla móvil 2 columnas (sm:3, lg:4), tarjetas compactas con nombre a 2 líneas.
 - `frontend/.env.production` apunta a https://jk-variedades.onrender.com.
 
 ## Arquitectura
